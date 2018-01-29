@@ -1,0 +1,78 @@
+######################################################################################################################
+# This is an example config file for the aws-s3-util                                                                 #
+######################################################################################################################
+# Dict:                                                                                                              #
+# 'bucket-name'             :: name of the s3 bucket associated with the config file                                 #
+# 'region'                  :: region in which the bucket is located, --us-east-1 is equivilant to US-Standard--     #
+# 'bucket-security-policy'  :: json string of the bucket policy assigned to this bucket                              #
+# 'life-cycle-rules'        :: json string of life cycle rules. This json is the input for the standard CLI          #
+######################################################################################################################
+
+bucket-name: STANDARD-CONFIG-BUCKET-NAME
+region: us-east-1
+bucket-security-policy:
+  Statement:
+  - Action: s3:*
+    Condition:
+      Bool:
+        aws:SecureTransport: false
+    Effect: Deny
+    Principal: '*'
+    Resource: arn:aws:s3:::STANDARD-CONFIG-BUCKET-NAME/*
+    Sid: RequiredSecureTransport
+  - Action: s3:PutObject
+    Condition:
+      "Null":
+        s3:x-amz-server-side-encryption: true
+    Effect: Deny
+    Principal: '*'
+    Resource: arn:aws:s3:::STANDARD-CONFIG-BUCKET-NAME/*
+    Sid: RequiredEncryptedPutObject
+  Version: '2012-10-17'
+###
+# prefix of effected resources
+# Transition : expire | transition
+# Status: enabled | disabled
+# Days : integer of days until rule takes action
+# Storage Class : STANDARD_IA | GLACIER  - only needed if transition
+###
+life-cycle-rules:
+  Rules:
+  - AbortIncompleteMultipartUpload:
+      DaysAfterInitiation: 7
+    Expiration:
+      Days: 400
+    ID: STANDARD-CONFIG-BUCKET-NAME
+    Prefix: ''
+    Status: Enabled
+    Transitions:
+      - Days: 30
+        StorageClass: STANDARD_IA
+logging-rules:
+  LoggingEnabled:
+    TargetBucket: STANDARD-CONFIG-LOGGING-BUCKET-NAME
+    TargetPrefix: STANDARD-CONFIG-BUCKET-NAME/
+bucket-analytics:
+  Id: EntireBucketAnalytics
+  StorageClassAnalysis:
+    DataExport:
+      Destination:
+        S3BucketDestination:
+          Bucket: arn:aws:s3:::STANDARD-CONFIG-LOGGING-BUCKET-NAME
+          Format: CSV
+          Prefix: _analytics/
+      OutputSchemaVersion: V_1
+bucket-metrics:
+  Id: EntireBucket
+bucket-tags:
+  TagSet:
+  - Key: Stack
+    Value: ''
+  - Key: App
+    Value: ''
+  - Key: Stage
+    Value: ''
+  - Key: Owner
+    Value: ''
+  - Key: orbProjectId
+    Value: ''

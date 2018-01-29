@@ -1,0 +1,59 @@
+bucket-name: STANDARD-CONFIG-BUCKET-NAME
+region: us-east-1
+ACL: log-delivery-write
+bucket-security-policy:
+  Statement:
+  - Action: s3:PutObject
+    Condition:
+      StringEquals:
+        s3:x-amz-acl: bucket-owner-full-control
+        aws:SourceAccount: STANDARD-CONFIG-ACCOUNT-ID
+    Effect: Allow
+    Principal:
+      Service:
+      - s3.amazonaws.com
+    Resource: arn:aws:s3:::STANDARD-CONFIG-BUCKET-NAME/*
+    Sid: AnalyticsPutObject
+  Version: '2012-10-17'
+life-cycle-rules:
+  Rules:
+    - AbortIncompleteMultipartUpload:
+        DaysAfterInitiation: 7
+      Expiration:
+        Days: 400
+      ID: STANDARD-CONFIG-BUCKET-NAME
+      Prefix: ''
+      Status: Enabled
+      Transitions:
+        - Days: 90
+          StorageClass: GLACIER
+        - Days: 30
+          StorageClass: STANDARD_IA
+bucket-analytics:
+  Id: EntireBucketAnalytics
+  StorageClassAnalysis:
+    DataExport:
+      Destination:
+        S3BucketDestination:
+          Bucket: arn:aws:s3:::STANDARD-CONFIG-BUCKET-NAME
+          Format: CSV
+          Prefix: _analytics/
+      OutputSchemaVersion: V_1
+bucket-metrics:
+  Id: EntireBucket
+bucket-tags:
+  TagSet:
+  - Key: Stack
+    Value: S3 Infrastructure
+  - Key: App
+    Value: S3 Bucket Logging
+  - Key: Stage
+    Value: infrastructure
+  - Key: Owner
+    Value: ''
+  - Key: orbProjectId
+    Value: ''
+  - Key: exception-encryption
+    Value: 'True'
+  - Key: exception-https
+    Value: 'True'
