@@ -168,12 +168,10 @@ def _create_from_config(parameters):
     '''
 
     # Check if Bucket Already Exists
-    try:
-        s3.Bucket(parameters['bucket-name']).load()
+    if s3.Bucket(parameters['bucket-name']) in s3.buckets.all():
         logger.warn("Bucket Already Exists")
         return
-    except botocore.exceptions.ClientError:
-        logger.info("Creating {}".format(parameters['bucket-name']))
+    logger.info("Creating {}".format(parameters['bucket-name']))
 
     # S3 assumes US-Standard unless otherwise specified and does not accept us-east-1 as an option
     if parameters['region'] == 'us-east-1':
