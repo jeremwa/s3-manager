@@ -18,7 +18,7 @@ myhandler.setFormatter(myformatter)
 
 
 # Set up Logging
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.WARN
 logger = logging.getLogger()
 logger.setLevel(LOG_LEVEL)
 logging.getLogger('boto3').setLevel(logging.WARN)
