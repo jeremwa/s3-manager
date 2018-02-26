@@ -26,6 +26,7 @@ logger.addHandler(myhandler)
 
 tagargs = []
 
+
 def bucket_tags(tag_string):
     """Parses the string passed into the tag argument
     and returns a list of tags."""
@@ -34,21 +35,22 @@ def bucket_tags(tag_string):
     key, value = tag_string.split(":", 1)
     tagargs.append({'Key': key, 'Value': value})
 
+
 # Organize Args
 parser = ArgumentParser(description="S3 Util Args", formatter_class=RawTextHelpFormatter)
-parser.add_argument("action", nargs=1, choices=['create', 'create-logging-bucket','update', 'delete', 'config','retrieve-config','test'],
+parser.add_argument("action", nargs=1, choices=['create', 'create-logging-bucket', 'update', 'delete', 'config', 'retrieve-config', 'test'],
                     help="Action on S3 Bucket - \n"
-                         " create                 -  Create a new bucket supplied config file [--config] REQUIRED\n"
-                         " create-logging-bucket  -  Creates a Logging bucket for a region\n"
-                         " update                 -  Updates a bucket based on supplied config file [--config] REQUIRED\n"
+                         " create                 -  Create a new bucket with the supplied config file [--config] REQUIRED\n"
+                         " create-logging-bucket  -  Create a logging bucket for a region\n"
+                         " update                 -  Update a bucket based on the supplied config file [--config] REQUIRED\n"
                          " delete                 -  NOT ENABLED\n"
-                         " retrieve-config        -  Retrieves the s3 configuration of a specified S3 Bucket [--bucketname] REQUIRED\n"
-                         " config                 -  Only Evaluates against a standard configuration file [--standardconfig] REQUIRED\n"
+                         " retrieve-config        -  Retrieve the s3 configuration of a specified S3 Bucket [--bucketname] REQUIRED\n"
+                         " config                 -  Evaluate against a standard configuration file [--standardconfig] REQUIRED\n"
                          " test                   -  FOR DEBUG PURPOSES ONLY\n")
 parser.add_argument("-c", "--config", required=False,
-                    help="Specify config file to use for Action")
+                    help="Config file to use for action")
 parser.add_argument("-p", "--profile", required=False,
-                    help="AWS Profile as Stored in ~/.aws/credentials")
+                    help="AWS Profile as stored in ~/.aws/credentials")
 parser.add_argument("-r", "--region", required=False,
                     help="For use when Creating Logging Bucket")
 parser.add_argument("-V", "--validate", required=False,
@@ -65,12 +67,9 @@ parser.add_argument("-t", "--tag", required=False, type=bucket_tags,
                         "Exception Tags: exception-https, exception-encryption\n"
                         "Example: -t stack:test -t stage:test -t owner:test -t app:test -t orbProjectId:1")
 
-
-
 args = parser.parse_args()
 
 PROFILE='default'  #
-REGION=''  # Probably not needed but placeholder if needed
 
 # Set Profile to run as
 if args.profile != 'default':
@@ -96,17 +95,16 @@ def main():
     if 'test' in args.action:
         parameters = Validation.open_and_validate_config(args.config, logger)
         print TagUtils.is_tag_in_tagset('Stacks', parameters['bucket-tags']['TagSet'])
-        #print client.get_bucket_metrics_configuration(Bucket='jw-aws-test-bucket2', Id='EntireBucket')['MetricsConfiguration']
-    
+
     elif 'create-logging-bucket' in args.action:
         if args.region == None:
             logger.error("No Region Specified")
             return
         _create_logging_bucket(args.region)
-    
+
     elif 'retrieve-config' in args.action:
         _fetch_config(args.bucketname)
-    
+
     else:
         parameters = {}
         if args.config:
