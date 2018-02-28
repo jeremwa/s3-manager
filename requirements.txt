@@ -1,5 +1,5 @@
+botocore==1.8.50
 setuptools==36.2.7
-botocore>=1.8.50
-boto3>=1.5.36
+boto3==1.5.36
 jsonschema==2.6.0
 PyYAML==3.12
