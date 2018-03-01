@@ -16,8 +16,7 @@ class ConfigManager(object):
             if self.is_valid(contents):
                 return contents
             else:
-                raise ValidationError('{} is not a valid config file'
-                                      .format(file))
+                raise ValidationError('{} is not a valid config file'.format(file))
         except Exception as ex:
             self.logger.error("Error opening {}: {}".format(file, ex))
             return None

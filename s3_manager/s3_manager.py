@@ -43,6 +43,8 @@ config_schema = """
 class Settings(object):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+        self.base_config = {}
+        self.bucket_config = {}
 
 
 settings = Settings()
@@ -51,16 +53,26 @@ settings = Settings()
 @click.group()
 @click.option('--standard/--logging', default=True)
 @click.option('--bucket-name', help='Name of the bucket')
+@click.option('--logging-bucket-name', help='Name of the logging bucket')
 @click.option('--create-region', help='Region where to create bucket',
               default='us-east-1')
-@click.option('--config', help='yaml config file')
-def cli(standard, create_region, bucket_name, config):
+@click.option('--base_config', help='base yaml configuration file')
+@click.option('--bucket_config', help='bucket-specific yaml configuration file')
+def cli(standard, create_region, bucket_name, base_config, bucket_config, logging_bucket_name):
+    config_manager = ConfigManager(schema=config_schema)
     settings.is_standard = standard
     settings.create_region = create_region
     settings.bucket_name = bucket_name
-    config_manager = ConfigManager(schema=config_schema)
-    settings.config = config_manager.read_yaml(config)
-    pass
+
+    if (settings.base_config):
+        settings.base_config = config_manager.read_yaml(base_config)
+    else:
+        settings.base_config = {}
+        
+    if (settings.bucket_config):
+        settings.bucket_config = config_manager.read_yaml(bucket_config)
+    else:
+        settings.bucket_config = {}
 
 
 @cli.command()
@@ -89,4 +101,4 @@ def create():
 
 
 if __name__ == '__main__':
-    cli()
+    cli(None, None, None, None)
